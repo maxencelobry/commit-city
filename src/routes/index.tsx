@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { Building2, Copy, Check, Github, Loader2, Moon, Sun, Sparkles } from "lucide-react";
 import {
+  ACCENT_HEX,
   ACCENT_NAMES,
   generateCitySvg,
   type Accent,
@@ -16,13 +17,13 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "Commit City renders any GitHub profile as a flat SVG skyline: repos become buildings, commits set the height, stars add landmarks. Day/night themes and shareable URLs.",
+          "Commit City renders your last 12 months of GitHub activity as a pixel-art SVG skyline: one building per month, height driven by commits. Day/night themes and shareable URLs.",
       },
       { property: "og:title", content: "Commit City — Your GitHub profile as a 2D city" },
       {
         property: "og:description",
         content:
-          "Repos become buildings, commits set the height, languages become districts. Generate your shareable SVG city.",
+          "One pixel tower per month, height driven by your commits. Generate your shareable SVG city.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -38,36 +39,30 @@ const DEMO: CityInput = {
   following: 12,
   publicRepos: 34,
   totalStars: 8730,
-  totalCommits: 5124,
-  repos: [
-    { name: "atlas", language: "TypeScript", stars: 1240, size: 9800, commits: 1830 },
-    { name: "prism", language: "TypeScript", stars: 320, size: 4300, commits: 940 },
-    { name: "tinylink", language: "TypeScript", stars: 12, size: 900, commits: 260 },
-    { name: "vectorize", language: "Rust", stars: 2100, size: 7600, commits: 1120 },
-    { name: "ferric", language: "Rust", stars: 88, size: 2200, commits: 410 },
-    { name: "notebooks", language: "Python", stars: 640, size: 5100, commits: 720 },
-    { name: "scraper", language: "Python", stars: 24, size: 1400, commits: 300 },
-    { name: "gopher-cache", language: "Go", stars: 512, size: 3300, commits: 560 },
-    { name: "dotfiles", language: "Shell", stars: 9, size: 600, commits: 180 },
-    { name: "portfolio", language: "CSS", stars: 3, size: 800, commits: 140 },
+  totalCommits: 1842,
+  bestMonth: "MAR",
+  streak: 11,
+  months: [
+    { label: "AUG", commits: 96 },
+    { label: "SEP", commits: 142 },
+    { label: "OCT", commits: 74 },
+    { label: "NOV", commits: 188 },
+    { label: "DEC", commits: 41 },
+    { label: "JAN", commits: 133 },
+    { label: "FEB", commits: 219 },
+    { label: "MAR", commits: 264 },
+    { label: "APR", commits: 88 },
+    { label: "MAY", commits: 176 },
+    { label: "JUN", commits: 205 },
+    { label: "JUL", commits: 216 },
   ],
-};
-
-const ACCENT_SWATCH: Record<Accent, string> = {
-  purple: "#a06bff",
-  green: "#3fb950",
-  blue: "#4c9aff",
-  orange: "#ff8a3d",
-  pink: "#ff6bb5",
-  cyan: "#37d5d3",
-  yellow: "#f0c000",
 };
 
 function Home() {
   const [username, setUsername] = useState("");
   const [submitted, setSubmitted] = useState<string | null>(null);
   const [theme, setTheme] = useState<Theme>("night");
-  const [color, setColor] = useState<Accent>("purple");
+  const [color, setColor] = useState<Accent>("lime");
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
 
@@ -115,16 +110,19 @@ function Home() {
 
       <section className="mx-auto max-w-5xl px-6 pt-6 pb-4 text-center">
         <span className="inline-flex items-center gap-2 rounded-full border border-border bg-card/60 px-3 py-1 text-xs tracking-wide text-muted-foreground uppercase">
-          <Sparkles className="size-3.5 text-primary" /> Flat vector city generator
+          <Sparkles className="size-3.5 text-primary" /> Pixel skyline generator
         </span>
-        <h1 className="mx-auto mt-5 max-w-3xl text-4xl leading-tight font-bold tracking-tight sm:text-6xl">
-          Your GitHub profile,
+        <h1
+          className="mx-auto mt-6 max-w-3xl text-3xl leading-tight tracking-tight sm:text-5xl"
+          style={{ fontFamily: "var(--font-pixel)" }}
+        >
+          YOUR LAST 12 MONTHS,
           <br />
-          rebuilt as a <span className="text-primary">2D city</span>
+          <span className="text-primary">AS A CITY</span>
         </h1>
-        <p className="mx-auto mt-5 max-w-xl text-base text-muted-foreground">
-          Every repository becomes a building. Commits set the height, project size sets the width,
-          stars grow landmarks, and each language gets its own district.
+        <p className="mx-auto mt-6 max-w-xl text-sm leading-relaxed text-muted-foreground">
+          One building per month over the last 12 months. The more you commit, the taller the tower
+          and the more windows light up on your pixel skyline.
         </p>
 
         <form
@@ -176,7 +174,7 @@ function Home() {
                 onClick={() => setColor(c)}
                 aria-label={c}
                 title={c}
-                style={{ backgroundColor: ACCENT_SWATCH[c] }}
+                style={{ backgroundColor: ACCENT_HEX[c] }}
                 className={`size-5 rounded-full transition-transform ${
                   color === c ? "ring-foreground scale-110 ring-2 ring-offset-2 ring-offset-card" : ""
                 }`}
@@ -200,7 +198,7 @@ function Home() {
           ) : (
             <img
               src={`data:image/svg+xml;utf8,${demoSvg}`}
-              alt="Example Commit City skyline with buildings grouped by programming language"
+              alt="Example Commit City pixel skyline with one building per month of commits"
               className="w-full rounded-2xl"
             />
           )}
@@ -226,12 +224,12 @@ function Home() {
         <div className="grid gap-4 sm:grid-cols-3">
           {[
             {
-              title: "Buildings = repos",
-              body: "Height scales with commit count, width with repository size. Roof antennas and stars appear past 10, 100 and 500 stargazers.",
+              title: "12 buildings = 12 months",
+              body: "One tower per month over the last year. Height and lit windows scale with the commits you pushed that month.",
             },
             {
-              title: "Districts = languages",
-              body: "Repos are zoned by primary language, each district painted with its official GitHub language color.",
+              title: "Pixel skyline",
+              body: "Flat pixel-art rendering: your busiest months glow in the accent color, quiet months stay grey on the grid.",
             },
             {
               title: "Shareable SVG",
@@ -245,7 +243,7 @@ function Home() {
           ))}
         </div>
         <p className="mt-10 text-center font-mono text-xs text-muted-foreground">
-          commit.city/username.svg?theme=night&amp;color=purple
+          commit.city/username.svg?theme=night&amp;color=lime
         </p>
       </section>
     </main>
