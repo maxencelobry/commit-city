@@ -11,7 +11,7 @@ export function parseOptions(url) {
   return {
     theme: url.searchParams.get("theme") === "day" ? "day" : "night",
     color: colors[url.searchParams.get("color")] ? url.searchParams.get("color") : "lime",
-    view: url.searchParams.get("view") === "buildings" ? "buildings" : "full",
+    view: ["full", "months", "city"].includes(url.searchParams.get("view")) ? url.searchParams.get("view") : "full",
   };
 }
 
@@ -26,7 +26,7 @@ export function generateCitySvg(city, options) {
   const accent = colors[options.color];
   const accents = ["#c6f432", "#54a8ff", "#b57bff", "#ff6bb5", "#3fe0da"];
   const max = Math.max(1, ...city.months.map((month) => month.commits));
-  const ground = options.view === "buildings" ? 480 : 405;
+  const ground = options.view === "city" ? 480 : 405;
   const towers = city.months.map((month, index) => {
     const width = 52;
     const x = 46 + index * 76;
@@ -40,7 +40,7 @@ export function generateCitySvg(city, options) {
         if ((row + col + index * 11) % 3 !== 0) windows.push(`<rect x="${col}" y="${row}" width="6" height="6" fill="${hot ? towerAccent : palette.dim}" opacity=".85"/>`);
       }
     }
-    const label = options.view === "full" ? `<text x="${x + width / 2}" y="${ground + 28}" text-anchor="middle" font-size="10" fill="${hot ? towerAccent : palette.dim}">${month.label}</text>` : "";
+    const label = options.view !== "city" ? `<text x="${x + width / 2}" y="${ground + 28}" text-anchor="middle" font-size="10" fill="${hot ? towerAccent : palette.dim}">${month.label}</text>` : "";
     return `<g><title>${escape(month.label)}: ${month.commits} commits</title><rect x="${x}" y="${y}" width="${width}" height="${height}" fill="${palette.building}" stroke="${hot ? towerAccent : palette.dim}" stroke-width="2"/>${windows.join("")}</g>${label}`;
   }).join("");
   const header = options.view === "full" ? `<text x="500" y="62" text-anchor="middle" font-size="34" font-weight="700" letter-spacing="7" fill="${palette.text}">COMMIT <tspan fill="${accent}">CITY</tspan></text><text x="500" y="88" text-anchor="middle" font-size="11" letter-spacing="3" fill="${palette.dim}">LAST 12 MONTHS · @${escape(city.username).toUpperCase()}</text>` : "";
