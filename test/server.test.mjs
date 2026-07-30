@@ -12,7 +12,7 @@ test("buildings view hides the header and statistics", () => {
       stars: 3,
       months: Array.from({ length: 12 }, (_, index) => ({ label: `M${index}`, commits: index + 1 })),
     },
-    parseOptions(new URL("http://localhost/?view=buildings")),
+    parseOptions(new URL("http://localhost/?view=city")),
   );
 
   assert.match(svg, /<svg/);
@@ -32,4 +32,5 @@ test("full city exposes the total contributions in the SVG", () => {
 
   assert.match(svg, /COMMITS \/ 12M:.*>103</);
 });
+
 
