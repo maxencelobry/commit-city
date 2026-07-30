@@ -24,7 +24,7 @@ export function calculateBadges(city) {
   return [
     ...(peak >= 20 ? [{ id: "night-owl", label: "Night Owl", detail: "A peak month above 20 commits" }] : []),
     ...(total >= 100 ? [{ id: "mayor", label: "Open Source Mayor", detail: "100+ contributions in the last year" }] : []),
-    ...(active >= 10 ? [{ id: "streak", label: "100-day streak", detail: "Active across 10+ months" }] : []),
+    ...(city.streak >= 100 ? [{ id: "streak", label: "100-day streak", detail: `${city.streak} consecutive active days` }] : []),
   ];
 }
 
@@ -85,6 +85,31 @@ export function parseContributionCalendar(html) {
   return months;
 }
 
+export function parseContributionStreak(html) {
+  const tips = new Map();
+  for (const match of html.matchAll(/<tool-tip\b([^>]*)>([\s\S]*?)<\/tool-tip>/g)) {
+    const id = match[1].match(/\bfor="(contribution-day-[^"]+)"/i)?.[1];
+    const count = match[2].replace(/<[^>]+>/g, "").match(/([\d,]+)\s+contribution/i);
+    if (id) tips.set(id, count ? Number(count[1].replace(/,/g, "")) : 0);
+  }
+  const activeDates = [];
+  for (const match of html.matchAll(/<[^>]*\bdata-date="(\d{4}-\d{2}-\d{2})"[^>]*>/g)) {
+    const id = match[0].match(/\bid="(contribution-day-[^"]+)"/i)?.[1];
+    if (id && (tips.get(id) || 0) > 0) activeDates.push(match[1]);
+  }
+  const dates = [...new Set(activeDates)].sort();
+  let longest = 0;
+  let run = 0;
+  for (let index = 0; index < dates.length; index += 1) {
+    const previous = index ? new Date(`${dates[index - 1]}T00:00:00Z`) : null;
+    const current = new Date(`${dates[index]}T00:00:00Z`);
+    const consecutive = previous && current - previous === 86400000;
+    run = consecutive ? run + 1 : 1;
+    longest = Math.max(longest, run);
+  }
+  return longest;
+}
+
 async function getCity(username) {
   const headers = { Accept: "application/vnd.github+json", "User-Agent": "commit-city" };
   if (process.env.GITHUB_TOKEN) headers.Authorization = `Bearer ${process.env.GITHUB_TOKEN}`;
@@ -98,13 +123,15 @@ async function getCity(username) {
     ? await profileResponse.json()
     : { login: username, followers: null, public_repos: null };
   const repos = reposResponse.ok ? await reposResponse.json() : [];
-  const contributions = contributionsResponse.ok ? parseContributionCalendar(await contributionsResponse.text()) : new Map();
+  const contributionHtml = contributionsResponse.ok ? await contributionsResponse.text() : "";
+  const contributions = contributionHtml ? parseContributionCalendar(contributionHtml) : new Map();
   const now = new Date();
   return {
     username: profile.login,
     followers: profile.followers ?? null,
     repos: profile.public_repos ?? null,
     stars: reposResponse.ok ? repos.filter((repo) => !repo.fork).reduce((total, repo) => total + (repo.stargazers_count || 0), 0) : null,
+    streak: contributionHtml ? parseContributionStreak(contributionHtml) : 0,
     months: Array.from({ length: 12 }, (_, index) => {
       const date = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - 11 + index, 1));
       const key = `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, "0")}`;
