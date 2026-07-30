@@ -51,6 +51,8 @@ export function generateCitySvg(city, options) {
     const y = ground - height;
     const hot = month.commits / max >= 0.45;
     const towerAccent = options.color === "mix" ? accents[index % accents.length] : accent;
+    const buildingFill = hot ? towerAccent : palette.building;
+    const buildingOpacity = hot ? ".28" : "1";
     const windows = [];
     for (let row = y + 16; row < ground - 10; row += 18) {
       for (let col = x + 12; col < x + width - 8; col += 16) {
@@ -58,7 +60,7 @@ export function generateCitySvg(city, options) {
       }
     }
     const label = options.view !== "city" ? `<text x="${x + width / 2}" y="${ground + 28}" text-anchor="middle" font-size="10" fill="${hot ? towerAccent : palette.dim}">${month.label}</text>` : "";
-    return `<g><title>${escape(month.label)}: ${month.commits} commits</title><rect x="${x}" y="${y}" width="${width}" height="${height}" fill="${palette.building}" stroke="${hot ? towerAccent : palette.dim}" stroke-width="2"/>${windows.join("")}</g>${label}`;
+    return `<g><title>${escape(month.label)}: ${month.commits} commits</title><rect x="${x}" y="${y}" width="${width}" height="${height}" fill="${buildingFill}" opacity="${buildingOpacity}" stroke="${hot ? towerAccent : palette.dim}" stroke-width="2"/>${windows.join("")}</g>${label}`;
   }).join("");
   const header = options.view === "full" ? `<text x="500" y="62" text-anchor="middle" font-size="34" font-weight="700" letter-spacing="7" fill="${palette.text}">COMMIT <tspan fill="${accent}">CITY</tspan></text><text x="500" y="88" text-anchor="middle" font-size="11" letter-spacing="3" fill="${palette.dim}">LAST 12 MONTHS · @${escape(city.username).toUpperCase()}</text>` : "";
   const { total, best, active, average, peak } = metrics(city);

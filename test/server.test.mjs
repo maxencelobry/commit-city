@@ -20,10 +20,17 @@ test("buildings view hides the header and statistics", () => {
 });
 
 test("building windows use the selected accent", () => {
-  const city = { username: "octocat", months: [{ label: "JAN", commits: 4 }] };
+  const city = { username: "octocat", months: [{ label: "JAN", commits: 1 }, { label: "FEB", commits: 4 }] };
   const svg = generateCitySvg(city, parseOptions(new URL("http://localhost/?color=purple")));
   assert.match(svg, /fill="#b57bff" opacity=".95"/);
   assert.match(svg, /fill="#20232c"/);
+});
+
+test("only high-activity buildings get a soft color wash", () => {
+  const city = { username: "octocat", months: [{ label: "LOW", commits: 1 }, { label: "HIGH", commits: 10 }] };
+  const svg = generateCitySvg(city, parseOptions(new URL("http://localhost/?color=purple")));
+  assert.match(svg, /fill="#b57bff" opacity=".28"/);
+  assert.match(svg, /fill="#20232c" opacity="1"/);
 });
 
 test("contribution calendar is grouped by month", () => {
