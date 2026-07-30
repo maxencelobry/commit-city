@@ -19,6 +19,7 @@ function render() {
   status.dataset.state = "loading";
   preview.src = previewPath;
   shareCode.textContent = new URL(sharePath, window.location.origin).href;
+  document.querySelector("#download").href = sharePath;
   markdown.textContent = "[![Commit City for @" + state.username + "](" + shareCode.textContent + ")](" + window.location.origin + ")";
   share.hidden = false;
   debugOutput.textContent = "Requesting @" + state.username + " · theme=" + state.theme + " · color=" + state.color + " · view=" + state.view;
