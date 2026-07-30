@@ -68,8 +68,10 @@ async function getCity(username) {
     fetch(`https://api.github.com/users/${encodeURIComponent(username)}/repos?per_page=100`, { headers }),
     fetch(`https://github.com/users/${encodeURIComponent(username)}/contributions`, { headers: { "User-Agent": "commit-city" } }),
   ]);
-  if (!profileResponse.ok) throw new Error(profileResponse.status === 404 ? "GitHub user not found" : "GitHub is unavailable");
-  const profile = await profileResponse.json();
+  if (profileResponse.status === 404) throw new Error("GitHub user not found");
+  const profile = profileResponse.ok
+    ? await profileResponse.json()
+    : { login: username, followers: 0, public_repos: 0 };
   const repos = reposResponse.ok ? await reposResponse.json() : [];
   const contributions = contributionsResponse.ok ? parseContributionCalendar(await contributionsResponse.text()) : new Map();
   const now = new Date();
