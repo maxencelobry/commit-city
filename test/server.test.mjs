@@ -19,18 +19,19 @@ test("buildings view hides the header and statistics", () => {
   assert.doesNotMatch(svg, /COMMIT CITY|COMMITS \/ 12M|LAST 12 MONTHS/);
 });
 
-test("building windows use the selected accent", () => {
+test("windows mix dark gray and accent colors", () => {
   const city = { username: "octocat", months: [{ label: "JAN", commits: 1 }, { label: "FEB", commits: 4 }] };
   const svg = generateCitySvg(city, parseOptions(new URL("http://localhost/?color=purple")));
   assert.match(svg, /fill="#b57bff" opacity=".95"/);
-  assert.match(svg, /fill="#20232c"/);
+  assert.match(svg, /fill="#969ba8" opacity=".72"/);
+  assert.match(svg, /fill="#20232c" stroke="#969ba8"/);
 });
 
-test("only high-activity buildings get a soft color wash", () => {
+test("activity changes the ratio of colored windows, not buildings", () => {
   const city = { username: "octocat", months: [{ label: "LOW", commits: 1 }, { label: "HIGH", commits: 10 }] };
   const svg = generateCitySvg(city, parseOptions(new URL("http://localhost/?color=purple")));
-  assert.match(svg, /fill="#b57bff" opacity=".28"/);
-  assert.match(svg, /fill="#20232c" opacity="1"/);
+  assert.doesNotMatch(svg, /fill="#b57bff" opacity=".28"/);
+  assert.match(svg, /fill="#20232c" stroke="#969ba8"/);
 });
 
 test("contribution calendar is grouped by month", () => {
