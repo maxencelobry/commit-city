@@ -19,10 +19,11 @@ test("buildings view hides the header and statistics", () => {
   assert.doesNotMatch(svg, /COMMIT CITY|COMMITS \/ 12M|LAST 12 MONTHS/);
 });
 
-test("colored buildings are the default and can be turned off", () => {
+test("building windows use the selected accent", () => {
   const city = { username: "octocat", months: [{ label: "JAN", commits: 4 }] };
-  assert.match(generateCitySvg(city, parseOptions(new URL("http://localhost/?color=purple"))), /fill="#b57bff"/);
-  assert.match(generateCitySvg(city, parseOptions(new URL("http://localhost/?color=purple&buildings=mono"))), /fill="#20232c"/);
+  const svg = generateCitySvg(city, parseOptions(new URL("http://localhost/?color=purple")));
+  assert.match(svg, /fill="#b57bff" opacity=".95"/);
+  assert.match(svg, /fill="#20232c"/);
 });
 
 test("contribution calendar is grouped by month", () => {

@@ -1,4 +1,4 @@
-const state = { theme: "night", color: "lime", buildings: "color", view: "full", username: "maxencelobry" };
+const state = { theme: "night", color: "lime", view: "full", username: "maxencelobry" };
 const preview = document.querySelector("#preview");
 const share = document.querySelector("#share");
 const shareCode = document.querySelector("#share-url");
@@ -7,7 +7,7 @@ const status = document.querySelector("#status");
 const debugOutput = document.querySelector("#debug-output");
 
 function cityUrl(fresh = false) {
-  const query = new URLSearchParams({ theme: state.theme, color: state.color, buildings: state.buildings, view: state.view });
+  const query = new URLSearchParams({ theme: state.theme, color: state.color, view: state.view });
   if (fresh) query.set("refresh", Date.now());
   return "/api/city/" + encodeURIComponent(state.username) + ".svg?" + query;
 }
@@ -40,7 +40,7 @@ preview.addEventListener("error", () => {
 
 document.querySelectorAll("[data-theme], [data-color], [data-view]").forEach((button) => {
   button.addEventListener("click", () => {
-    const group = button.dataset.theme ? "theme" : button.dataset.color ? "color" : button.dataset.buildings ? "buildings" : "view";
+    const group = button.dataset.theme ? "theme" : button.dataset.color ? "color" : "view";
     state[group] = button.dataset[group];
     document.querySelectorAll("[data-" + group + "]").forEach((item) => item.classList.toggle("selected", item === button));
     render();
