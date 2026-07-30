@@ -1,7 +1,8 @@
 const state = { theme: "night", color: "lime", view: "full", username: "octocat" };
 const preview = document.querySelector("#preview");
 const share = document.querySelector("#share");
-const shareCode = share.querySelector("code");
+const shareCode = document.querySelector("#share-url");
+const markdown = document.querySelector("#markdown");
 const status = document.querySelector("#status");
 const debugOutput = document.querySelector("#debug-output");
 
@@ -18,6 +19,7 @@ function render() {
   status.dataset.state = "loading";
   preview.src = previewPath;
   shareCode.textContent = new URL(sharePath, window.location.origin).href;
+  markdown.textContent = "[![Commit City for @" + state.username + "](" + shareCode.textContent + ")](" + window.location.origin + ")";
   share.hidden = false;
   debugOutput.textContent = "Requesting @" + state.username + " · theme=" + state.theme + " · color=" + state.color + " · view=" + state.view;
 }
@@ -54,6 +56,13 @@ document.querySelector("#copy").addEventListener("click", async () => {
   const button = document.querySelector("#copy");
   button.textContent = "Copied";
   setTimeout(() => (button.textContent = "Copy URL"), 1200);
+});
+
+document.querySelector("#copy-markdown").addEventListener("click", async () => {
+  await navigator.clipboard.writeText(markdown.textContent);
+  const button = document.querySelector("#copy-markdown");
+  button.textContent = "Markdown copied";
+  setTimeout(() => (button.textContent = "Copy Markdown"), 1200);
 });
 
 render();
