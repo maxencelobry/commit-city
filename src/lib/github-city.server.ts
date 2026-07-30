@@ -31,25 +31,21 @@ async function monthlyCommits(username: string): Promise<MonthInput[]> {
   );
   if (res.ok) {
     const html = await res.text();
-    const re = /data-date="(\d{4}-\d{2})-\d{2}"[^>]*data-level="(\d+)"/g;
-    const countRe = /<td[^>]*data-date="(\d{4}-\d{2})-\d{2}"[^>]*>([\s\S]*?)<\/td>/g;
-    let m: RegExpExecArray | null;
-    let matched = false;
-    while ((m = countRe.exec(html))) {
-      const month = m[1];
-      if (!buckets.has(month)) continue;
-      const inner = m[2];
-      const num = inner.match(/(\d+)\s+contribution/);
-      const value = num ? Number(num[1]) : 0;
-      buckets.set(month, (buckets.get(month) ?? 0) + value);
-      matched = true;
+
+    // Tooltips hold the real counts: <tool-tip for="contribution-day-...">N contributions on ...
+    const tips = new Map<string, number>();
+    const tipRe = /<tool-tip[^>]*for="(contribution-day-[^"]+)"[^>]*>([^<]*)<\/tool-tip>/g;
+    let t: RegExpExecArray | null;
+    while ((t = tipRe.exec(html))) {
+      const n = t[2].match(/^(\d+)\s+contribution/);
+      tips.set(t[1], n ? Number(n[1]) : 0);
     }
-    if (!matched) {
-      while ((m = re.exec(html))) {
-        const month = m[1];
-        if (!buckets.has(month)) continue;
-        buckets.set(month, (buckets.get(month) ?? 0) + Number(m[2]) * 3);
-      }
+
+    const dayRe = /data-date="(\d{4}-\d{2})-\d{2}"[^>]*id="(contribution-day-[^"]+)"/g;
+    let d: RegExpExecArray | null;
+    while ((d = dayRe.exec(html))) {
+      if (!buckets.has(d[1])) continue;
+      buckets.set(d[1], (buckets.get(d[1]) ?? 0) + (tips.get(d[2]) ?? 0));
     }
   }
 
