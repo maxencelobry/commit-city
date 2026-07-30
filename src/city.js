@@ -47,8 +47,9 @@ export function generateCitySvg(city, options) {
   const active = city.months.filter((month) => month.commits > 0).length;
   const best = city.months.reduce((top, month) => month.commits > top.commits ? month : top, city.months[0]);
   const stats = options.view === "full" ? [["COMMITS / 12M", compact(city.months.reduce((total, month) => total + month.commits, 0))], ["BEST MONTH", best.label], ["ACTIVE MONTHS", compact(active)]].map(([label, value], index) => `<text x="${250 + index * 250}" y="530" text-anchor="middle" font-size="11" fill="${palette.dim}">${label}: <tspan fill="${accent}">${value}</tspan></text>`).join("") : "";
-  const stars = day ? "" : Array.from({ length: 30 }, (_, index) => `<circle cx="${30 + (index * 83) % 940}" cy="${18 + (index * 47) % 250}" r="1" fill="${accent}" opacity=".35"/>`).join("");
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 560" width="1000" height="560" role="img" aria-label="Commit City for ${escape(city.username)}"><rect width="1000" height="560" rx="16" fill="${palette.bg}"/>${stars}${header}${towers}<path d="M0 ${ground}H1000" stroke="${accent}" stroke-width="3"/>${stats}</svg>`;
+  const stars = day ? "" : Array.from({ length: 30 }, (_, index) => `<circle cx="${30 + (index * 83) % 940}" cy="${18 + (index * 47) % 250}" r="1" fill="${accent}" opacity=".35"><animate attributeName="opacity" values=".12;.7;.12" dur="${2 + index % 3}s" begin="${index / 8}s" repeatCount="indefinite"/></circle>`).join("");
+  const crop = options.view === "city" ? { y: 120, h: 400 } : options.view === "months" ? { y: 80, h: 450 } : { y: 0, h: 560 };
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 ${crop.y} 1000 ${crop.h}" width="1000" height="${crop.h}" role="img" aria-label="Commit City for ${escape(city.username)}"><rect y="${crop.y}" width="1000" height="${crop.h}" fill="${palette.bg}"/>${stars}${header}${towers}<path d="M0 ${ground}H1000" stroke="${accent}" stroke-width="3"/>${stats}</svg>`;
 }
 
 export function parseContributionCalendar(html) {
