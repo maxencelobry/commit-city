@@ -1,17 +1,16 @@
 /**
- * Commit City — pure SVG city generator.
+ * Commit City — pure SVG generator (pixel / retro skyline).
+ * One building per month over the last 12 months.
  * No DOM, no Node APIs: safe on the edge runtime and in the browser.
  */
 
 export type Theme = "day" | "night";
 
-export type Accent = "purple" | "green" | "blue" | "orange" | "pink" | "cyan" | "yellow";
+export type Accent = "lime" | "purple" | "blue" | "orange" | "pink" | "cyan" | "yellow";
 
-export interface RepoInput {
-  name: string;
-  language: string | null;
-  stars: number;
-  size: number;
+export interface MonthInput {
+  /** short label, e.g. "JAN" */
+  label: string;
   commits: number;
 }
 
@@ -23,7 +22,9 @@ export interface CityInput {
   publicRepos: number;
   totalStars: number;
   totalCommits: number;
-  repos: RepoInput[];
+  bestMonth: string;
+  streak: number;
+  months: MonthInput[];
 }
 
 export interface CityOptions {
@@ -32,56 +33,24 @@ export interface CityOptions {
 }
 
 const ACCENTS: Record<Accent, string> = {
-  purple: "#a06bff",
-  green: "#3fb950",
-  blue: "#4c9aff",
-  orange: "#ff8a3d",
+  lime: "#c6f432",
+  purple: "#b57bff",
+  blue: "#54a8ff",
+  orange: "#ff9542",
   pink: "#ff6bb5",
-  cyan: "#37d5d3",
-  yellow: "#f0c000",
+  cyan: "#3fe0da",
+  yellow: "#f5cd2f",
 };
 
 export const ACCENT_NAMES = Object.keys(ACCENTS) as Accent[];
+export const ACCENT_HEX = ACCENTS;
 
 export function parseTheme(v: string | null): Theme {
   return v === "day" ? "day" : "night";
 }
 
 export function parseAccent(v: string | null): Accent {
-  return (ACCENT_NAMES as string[]).includes(v ?? "") ? (v as Accent) : "purple";
-}
-
-const LANG_COLORS: Record<string, string> = {
-  TypeScript: "#3178c6",
-  JavaScript: "#f1e05a",
-  Python: "#3572a5",
-  Go: "#00add8",
-  Rust: "#dea584",
-  Java: "#b07219",
-  Ruby: "#c8443c",
-  "C++": "#f34b7d",
-  C: "#8b8b8b",
-  "C#": "#178600",
-  PHP: "#7a86b8",
-  Swift: "#f05138",
-  Kotlin: "#a97bff",
-  Dart: "#00b4ab",
-  HTML: "#e34c26",
-  CSS: "#8a6ac0",
-  Shell: "#89e051",
-  Vue: "#41b883",
-  Elixir: "#9b6fb0",
-  Haskell: "#8877c0",
-  Lua: "#4f6fd0",
-  Zig: "#ec915c",
-  Other: "#8892a8",
-};
-
-function langColor(lang: string) {
-  if (LANG_COLORS[lang]) return LANG_COLORS[lang];
-  let h = 0;
-  for (let i = 0; i < lang.length; i++) h = (h * 31 + lang.charCodeAt(i)) % 360;
-  return "hsl(" + h + " 62% 55%)";
+  return (ACCENT_NAMES as string[]).includes(v ?? "") ? (v as Accent) : "lime";
 }
 
 function esc(s: string) {
@@ -106,116 +75,90 @@ function rng(seed: string) {
 }
 
 interface Palette {
-  skyTop: string;
-  skyBottom: string;
-  ground: string;
-  road: string;
-  panelLine: string;
+  bg: string;
+  wallOn: string;
+  wallOff: string;
+  outlineOff: string;
+  windowOff: string;
   text: string;
   dim: string;
-  shade: string;
-  window: string;
-  windowOff: string;
+  hair: string;
 }
 
 function palette(theme: Theme): Palette {
   return theme === "night"
     ? {
-        skyTop: "#080a18",
-        skyBottom: "#1d1540",
-        ground: "#14162a",
-        road: "#0d0f1d",
-        panelLine: "#ffffff1f",
-        text: "#eef1ff",
-        dim: "#9aa3c7",
-        shade: "#00000055",
-        window: "#ffe9a8",
-        windowOff: "#ffffff14",
+        bg: "#0e0e10",
+        wallOn: "#14170c",
+        wallOff: "#17181c",
+        outlineOff: "#3b3f4a",
+        windowOff: "#9aa0ad",
+        text: "#ece7dc",
+        dim: "#8b91a0",
+        hair: "#ffffff14",
       }
     : {
-        skyTop: "#a8dcff",
-        skyBottom: "#eef8ff",
-        ground: "#dbe7d4",
-        road: "#c6d2c4",
-        panelLine: "#0b204018",
-        text: "#12203a",
-        dim: "#5a6b86",
-        shade: "#00000022",
-        window: "#ffffffdd",
-        windowOff: "#0b204014",
+        bg: "#f2efe6",
+        wallOn: "#e8f2c8",
+        wallOff: "#e0ddd2",
+        outlineOff: "#a9a598",
+        windowOff: "#9b9789",
+        text: "#1c1c1a",
+        dim: "#6b6counter",
+        hair: "#0000000f",
       };
 }
 
-const W = 900;
-const H = 500;
-const GROUND_Y = 360;
+const W = 1000;
+const H = 560;
+const GRID = 5; // pixel unit
+const GROUND_Y = 430;
 
 export function generateCitySvg(city: CityInput, opts: CityOptions): string {
   const p = palette(opts.theme);
+  if (opts.theme === "day") p.dim = "#6b6b63";
   const accent = ACCENTS[opts.color];
   const rand = rng(city.username || "city");
 
-  const byLang = new Map<string, RepoInput[]>();
-  for (const r of city.repos) {
-    const key = r.language ?? "Other";
-    if (!byLang.has(key)) byLang.set(key, []);
-    byLang.get(key)!.push(r);
-  }
-  const districts = [...byLang.entries()]
-    .sort((a, b) => b[1].length - a[1].length)
-    .slice(0, 5)
-    .map(([lang, repos]) => ({
-      lang,
-      color: langColor(lang),
-      repos: [...repos].sort((a, b) => b.commits - a.commits).slice(0, 8),
-    }));
+  const months = city.months.slice(-12);
+  const maxCommits = Math.max(1, ...months.map((m) => m.commits));
 
-  const shown = districts.flatMap((d) => d.repos);
-  const maxCommits = Math.max(1, ...shown.map((r) => r.commits));
-  const maxSize = Math.max(1, ...shown.map((r) => r.size));
+  const padX = 46;
+  const slot = (W - padX * 2) / months.length;
+  const bw = Math.round((slot * 0.74) / GRID) * GRID;
 
-  const padX = 34;
-  const usable = W - padX * 2;
-  const totalBuildings = shown.length || 1;
-  const gap = 7;
-  const districtGap = 26;
-  const availWidth =
-    usable - districtGap * Math.max(0, districts.length - 1) - gap * (totalBuildings - 1);
-  const unit = Math.max(14, availWidth / totalBuildings);
-
-  let x = padX;
   const buildings: string[] = [];
   const labels: string[] = [];
 
-  districts.forEach((d, di) => {
-    const startX = x;
-    d.repos.forEach((r) => {
-      const wRatio = Math.sqrt(Math.min(1, r.size / maxSize));
-      const bw = Math.max(18, Math.min(70, unit * (0.72 + wRatio * 0.7)));
-      const hRatio = Math.pow(r.commits / maxCommits, 0.6);
-      const bh = 28 + hRatio * 225;
-      buildings.push(building(x, GROUND_Y - bh, bw, bh, r, d.color, p, accent, rand));
-      x += bw + gap;
-    });
-    const districtW = Math.max(10, x - gap - startX);
-    labels.push(districtLabel(startX, districtW, d.lang, d.color, p));
-    if (di < districts.length - 1) {
-      buildings.push(
-        '<rect x="' +
-          (x - gap + 4).toFixed(1) +
-          '" y="' +
-          GROUND_Y +
-          '" width="' +
-          (districtGap - 8) +
-          '" height="30" fill="' +
-          p.road +
-          '"/>',
-      );
-      x += districtGap;
-    }
+  months.forEach((m, i) => {
+    const ratio = m.commits / maxCommits;
+    const hot = ratio >= 0.45;
+    const rows = Math.max(2, Math.round((26 + Math.pow(ratio, 0.75) * 190) / (GRID * 4)));
+    const bh = rows * GRID * 4;
+    const x = Math.round((padX + i * slot + (slot - bw) / 2) / GRID) * GRID;
+    const y = GROUND_Y - bh;
+    buildings.push(pixelBuilding(x, y, bw, bh, hot, ratio, m, p, accent, rand));
+    labels.push(
+      '<text x="' +
+        (x + bw / 2).toFixed(1) +
+        '" y="' +
+        (GROUND_Y + 26) +
+        '" text-anchor="middle" font-size="11" letter-spacing="2.5" fill="' +
+        (hot ? accent : p.dim) +
+        '">' +
+        esc(m.label) +
+        "</text>" +
+        '<text x="' +
+        (x + bw / 2).toFixed(1) +
+        '" y="' +
+        (GROUND_Y + 42) +
+        '" text-anchor="middle" font-size="10" letter-spacing="1" fill="' +
+        p.dim +
+        '" opacity="0.7">' +
+        fmt(m.commits) +
+        "</text>",
+    );
   });
-
-  const scale = x - gap > W - padX ? (usable / (x - gap - padX)).toFixed(4) : "1";
 
   return (
     '<svg xmlns="http://www.w3.org/2000/svg" width="' +
@@ -226,308 +169,150 @@ export function generateCitySvg(city: CityInput, opts: CityOptions): string {
     W +
     " " +
     H +
-    '" role="img" aria-label="Commit City for ' +
+    '" role="img" aria-label="Commit City — last 12 months for ' +
     esc(city.username) +
-    "\" font-family=\"'Segoe UI',Inter,Helvetica,Arial,sans-serif\">" +
-    '<defs><linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="' +
-    p.skyTop +
-    '"/><stop offset="100%" stop-color="' +
-    p.skyBottom +
-    '"/></linearGradient>' +
-    '<linearGradient id="glow" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="' +
-    accent +
-    '" stop-opacity="0"/><stop offset="100%" stop-color="' +
-    accent +
-    '" stop-opacity="0.26"/></linearGradient>' +
-    '<clipPath id="card"><rect x="0" y="0" width="' +
+    '" font-family="\'Courier New\',ui-monospace,monospace" shape-rendering="crispEdges">' +
+    '<defs><clipPath id="card"><rect x="0" y="0" width="' +
     W +
     '" height="' +
     H +
-    '" rx="18"/></clipPath></defs>' +
+    '" rx="14"/></clipPath></defs>' +
     '<g clip-path="url(#card)">' +
     '<rect width="' +
     W +
     '" height="' +
     H +
-    '" fill="url(#sky)"/>' +
-    starsLayer(opts.theme, rand) +
-    sun(opts.theme, p) +
-    '<rect x="0" y="150" width="' +
-    W +
-    '" height="' +
-    (GROUND_Y - 150) +
-    '" fill="url(#glow)"/>' +
-    skyline(p) +
-    '<rect x="0" y="' +
-    GROUND_Y +
-    '" width="' +
-    W +
-    '" height="' +
-    (H - GROUND_Y) +
     '" fill="' +
-    p.ground +
+    p.bg +
     '"/>' +
+    starfield(opts.theme, rand, p, accent) +
+    '<text x="' +
+    W / 2 +
+    '" y="86" text-anchor="middle" font-size="46" font-weight="700" letter-spacing="10" fill="' +
+    p.text +
+    '">COMMIT<tspan fill="' +
+    accent +
+    '"> CITY</tspan></text>' +
+    '<text x="' +
+    W / 2 +
+    '" y="116" text-anchor="middle" font-size="12" letter-spacing="6" fill="' +
+    p.dim +
+    '">LAST 12 MONTHS · <tspan fill="' +
+    accent +
+    '">@' +
+    esc(city.username).toUpperCase() +
+    "</tspan></text>" +
+    buildings.join("") +
     '<rect x="0" y="' +
     GROUND_Y +
     '" width="' +
     W +
-    '" height="4" fill="' +
+    '" height="3" fill="' +
     accent +
-    '" opacity="0.75"/>' +
-    '<g transform="scale(' +
-    scale +
-    ',1)">' +
-    buildings.join("") +
+    '"/>' +
     labels.join("") +
-    "</g>" +
-    '<text x="34" y="42" fill="' +
-    p.text +
-    '" font-size="22" font-weight="700">' +
-    esc(city.name || city.username) +
-    '<tspan fill="' +
-    accent +
-    '"> · Commit City</tspan></text>' +
-    '<text x="34" y="63" fill="' +
-    p.dim +
-    '" font-size="13">@' +
-    esc(city.username) +
-    " — " +
-    fmt(city.publicRepos) +
-    " repos across " +
-    districts.length +
-    " language districts</text>" +
     statsRow(city, p, accent) +
     "</g>" +
-    '<rect x="0.5" y="0.5" width="' +
-    (W - 1) +
-    '" height="' +
-    (H - 1) +
-    '" rx="18" fill="none" stroke="' +
-    p.panelLine +
-    '"/>' +
     "</svg>"
   );
 }
 
-function sun(theme: Theme, p: Palette) {
-  return theme === "night"
-    ? '<circle cx="778" cy="80" r="26" fill="#f6f1d8" opacity="0.92"/><circle cx="766" cy="70" r="26" fill="' +
-        p.skyTop +
-        '"/>'
-    : '<circle cx="778" cy="80" r="46" fill="#fff3b0" opacity="0.35"/><circle cx="778" cy="80" r="28" fill="#ffe57a"/>';
-}
-
-function skyline(p: Palette) {
+function starfield(theme: Theme, rand: () => number, p: Palette, accent: string) {
+  if (theme === "day") return "";
   let out = "";
-  let x = -20;
-  const r = rng("skyline");
-  while (x < W + 40) {
-    const w = 30 + r() * 50;
-    const h = 40 + r() * 90;
+  for (let i = 0; i < 42; i++) {
+    const x = Math.round((rand() * W) / GRID) * GRID;
+    const y = Math.round((rand() * 300) / GRID) * GRID;
     out +=
       '<rect x="' +
-      x.toFixed(1) +
+      x +
       '" y="' +
-      (GROUND_Y - h).toFixed(1) +
-      '" width="' +
-      w.toFixed(1) +
-      '" height="' +
-      h.toFixed(1) +
-      '" fill="' +
-      p.shade +
-      '"/>';
-    x += w + 6;
-  }
-  return '<g opacity="0.5">' + out + "</g>";
-}
-
-function starsLayer(theme: Theme, rand: () => number) {
-  if (theme !== "night") {
-    let clouds = "";
-    for (let i = 0; i < 4; i++) {
-      const cx = 60 + rand() * 640;
-      const cy = 46 + rand() * 90;
-      clouds +=
-        '<g fill="#ffffff" opacity="0.8"><ellipse cx="' +
-        cx.toFixed(0) +
-        '" cy="' +
-        cy.toFixed(0) +
-        '" rx="34" ry="14"/><ellipse cx="' +
-        (cx + 26).toFixed(0) +
-        '" cy="' +
-        (cy + 5).toFixed(0) +
-        '" rx="24" ry="11"/><ellipse cx="' +
-        (cx - 24).toFixed(0) +
-        '" cy="' +
-        (cy + 6).toFixed(0) +
-        '" rx="20" ry="10"/></g>';
-    }
-    return clouds;
-  }
-  let out = "";
-  for (let i = 0; i < 70; i++) {
-    out +=
-      '<circle cx="' +
-      (rand() * W).toFixed(1) +
-      '" cy="' +
-      (rand() * 250).toFixed(1) +
-      '" r="' +
-      (rand() * 1.4 + 0.4).toFixed(2) +
-      '" fill="#ffffff" opacity="' +
-      (0.25 + rand() * 0.6).toFixed(2) +
+      y +
+      '" width="2" height="2" fill="' +
+      (rand() > 0.85 ? accent : p.windowOff) +
+      '" opacity="' +
+      (0.15 + rand() * 0.35).toFixed(2) +
       '"/>';
   }
   return out;
 }
 
-function building(
+function pixelBuilding(
   x: number,
   y: number,
   w: number,
   h: number,
-  r: RepoInput,
-  color: string,
+  hot: boolean,
+  ratio: number,
+  m: MonthInput,
   p: Palette,
   accent: string,
   rand: () => number,
 ) {
+  const stroke = hot ? accent : p.outlineOff;
   const parts: string[] = [];
   parts.push(
     '<rect x="' +
-      x.toFixed(1) +
+      x +
       '" y="' +
-      y.toFixed(1) +
+      y +
       '" width="' +
-      w.toFixed(1) +
+      w +
       '" height="' +
-      h.toFixed(1) +
-      '" rx="3" fill="' +
-      color +
-      '"/>',
-  );
-  parts.push(
-    '<rect x="' +
-      (x + w * 0.74).toFixed(1) +
-      '" y="' +
-      y.toFixed(1) +
-      '" width="' +
-      (w * 0.26).toFixed(1) +
-      '" height="' +
-      h.toFixed(1) +
+      h +
       '" fill="' +
-      p.shade +
-      '"/>',
+      (hot ? p.wallOn : p.wallOff) +
+      '" stroke="' +
+      stroke +
+      '" stroke-width="2"/>',
   );
+  // roof cap
   parts.push(
-    '<rect x="' +
-      x.toFixed(1) +
-      '" y="' +
-      y.toFixed(1) +
-      '" width="' +
-      w.toFixed(1) +
-      '" height="5" rx="2" fill="#ffffff" opacity="0.35"/>',
+    '<rect x="' + x + '" y="' + y + '" width="' + w + '" height="' + GRID + '" fill="' + stroke + '"/>',
   );
-  const cols = Math.max(1, Math.floor((w - 8) / 9));
-  const rows = Math.max(1, Math.floor((h - 18) / 12));
+
+  // pixel windows grid
+  const cell = GRID * 4;
+  const cols = Math.max(1, Math.floor((w - GRID * 3) / cell));
+  const rows = Math.max(1, Math.floor((h - GRID * 5) / cell));
+  const offX = x + Math.round((w - cols * cell + GRID * 2) / 2);
+  const density = 0.35 + ratio * 0.55;
   for (let c = 0; c < cols; c++) {
-    for (let rw = 0; rw < rows; rw++) {
-      const on = rand() > 0.45;
+    for (let r = 0; r < rows; r++) {
+      if (rand() > density) continue;
       parts.push(
         '<rect x="' +
-          (x + 5 + c * 9).toFixed(1) +
+          (offX + c * cell) +
           '" y="' +
-          (y + 12 + rw * 12).toFixed(1) +
-          '" width="4" height="6" fill="' +
-          (on ? p.window : p.windowOff) +
+          (y + GRID * 3 + r * cell) +
+          '" width="' +
+          GRID * 2 +
+          '" height="' +
+          GRID * 2 +
+          '" fill="' +
+          (hot ? accent : p.windowOff) +
           '"/>',
       );
     }
   }
-  if (r.stars >= 10) {
-    const antenna = Math.min(34, 8 + Math.log10(r.stars + 1) * 14);
-    parts.push(
-      '<rect x="' +
-        (x + w / 2 - 1).toFixed(1) +
-        '" y="' +
-        (y - antenna).toFixed(1) +
-        '" width="2" height="' +
-        antenna.toFixed(1) +
-        '" fill="' +
-        p.dim +
-        '"/>',
-    );
-    parts.push(star(x + w / 2, y - antenna - 5, r.stars >= 100 ? 6 : 4, accent));
-  }
-  if (r.stars >= 500) {
-    parts.push(
-      '<circle cx="' +
-        (x + w / 2).toFixed(1) +
-        '" cy="' +
-        (y - 30).toFixed(1) +
-        '" r="12" fill="' +
-        accent +
-        '" opacity="0.2"/>',
-    );
-  }
-  parts.push(
-    "<title>" +
-      esc(r.name) +
-      " — " +
-      fmt(r.commits) +
-      " commits · " +
-      fmt(r.stars) +
-      " stars · " +
-      esc(r.language ?? "Other") +
-      "</title>",
-  );
+  parts.push("<title>" + esc(m.label) + " — " + fmt(m.commits) + " commits</title>");
   return "<g>" + parts.join("") + "</g>";
-}
-
-function star(cx: number, cy: number, r: number, fill: string) {
-  const pts: string[] = [];
-  for (let i = 0; i < 10; i++) {
-    const rad = i % 2 === 0 ? r : r / 2.4;
-    const a = (Math.PI / 5) * i - Math.PI / 2;
-    pts.push((cx + Math.cos(a) * rad).toFixed(1) + "," + (cy + Math.sin(a) * rad).toFixed(1));
-  }
-  return '<polygon points="' + pts.join(" ") + '" fill="' + fill + '"/>';
-}
-
-function districtLabel(x: number, w: number, lang: string, color: string, p: Palette) {
-  return (
-    '<g><rect x="' +
-    x.toFixed(1) +
-    '" y="' +
-    (GROUND_Y + 12) +
-    '" width="' +
-    w.toFixed(1) +
-    '" height="3" rx="1.5" fill="' +
-    color +
-    '" opacity="0.85"/><text x="' +
-    (x + w / 2).toFixed(1) +
-    '" y="' +
-    (GROUND_Y + 32) +
-    '" text-anchor="middle" font-size="11" font-weight="600" fill="' +
-    p.dim +
-    '">' +
-    esc(lang) +
-    "</text></g>"
-  );
 }
 
 function statsRow(city: CityInput, p: Palette, accent: string) {
   const items: Array<[string, string]> = [
-    ["commits", fmt(city.totalCommits)],
-    ["stars", fmt(city.totalStars)],
-    ["repos", fmt(city.publicRepos)],
-    ["followers", fmt(city.followers)],
-    ["following", fmt(city.following)],
+    ["COMMITS / 12M", fmt(city.totalCommits)],
+    ["BEST MONTH", city.bestMonth],
+    ["ACTIVE MONTHS", fmt(city.streak)],
+    ["STARS", fmt(city.totalStars)],
+    ["REPOS", fmt(city.publicRepos)],
+    ["FOLLOWERS", fmt(city.followers)],
   ];
-  const y = 432;
-  const boxW = (W - 68 - 12 * (items.length - 1)) / items.length;
+  const y = 486;
+  const boxW = (W - 92 - 10 * (items.length - 1)) / items.length;
   return items
     .map(([label, value], i) => {
-      const bx = 34 + i * (boxW + 12);
+      const bx = 46 + i * (boxW + 10);
       return (
         '<g><rect x="' +
         bx.toFixed(1) +
@@ -535,24 +320,24 @@ function statsRow(city: CityInput, p: Palette, accent: string) {
         y +
         '" width="' +
         boxW.toFixed(1) +
-        '" height="46" rx="10" fill="' +
-        p.panelLine +
-        '"/><text x="' +
+        '" height="44" fill="none" stroke="' +
+        p.hair +
+        '" stroke-width="2"/><text x="' +
         (bx + boxW / 2).toFixed(1) +
         '" y="' +
-        (y + 22) +
-        '" text-anchor="middle" font-size="17" font-weight="700" fill="' +
+        (y + 21) +
+        '" text-anchor="middle" font-size="16" font-weight="700" letter-spacing="1" fill="' +
         accent +
         '">' +
-        value +
+        esc(value) +
         '</text><text x="' +
         (bx + boxW / 2).toFixed(1) +
         '" y="' +
-        (y + 38) +
-        '" text-anchor="middle" font-size="10" letter-spacing="0.6" fill="' +
+        (y + 36) +
+        '" text-anchor="middle" font-size="8" letter-spacing="1.6" fill="' +
         p.dim +
         '">' +
-        label.toUpperCase() +
+        label +
         "</text></g>"
       );
     })
@@ -566,16 +351,16 @@ export function errorSvg(message: string, opts: CityOptions): string {
     W +
     '" height="180" viewBox="0 0 ' +
     W +
-    " 180\" font-family=\"'Segoe UI',Inter,Helvetica,Arial,sans-serif\"><rect width=\"" +
+    ' 180" font-family="\'Courier New\',ui-monospace,monospace" shape-rendering="crispEdges"><rect width="' +
     W +
-    '" height="180" rx="18" fill="' +
-    p.skyBottom +
-    '"/><text x="34" y="80" font-size="20" font-weight="700" fill="' +
+    '" height="180" rx="14" fill="' +
+    p.bg +
+    '"/><text x="46" y="82" font-size="24" font-weight="700" letter-spacing="6" fill="' +
     p.text +
-    '">Commit City</text><text x="34" y="110" font-size="14" fill="' +
+    '">COMMIT CITY</text><text x="46" y="112" font-size="13" letter-spacing="2" fill="' +
     p.dim +
     '">' +
-    esc(message) +
+    esc(message).toUpperCase() +
     "</text></svg>"
   );
 }
