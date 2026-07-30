@@ -62,14 +62,17 @@ export function generateCitySvg(city, options) {
       }
     }
     const label = options.view !== "city" ? `<text x="${x + width / 2}" y="${ground + 28}" text-anchor="middle" font-size="10" fill="${hot ? towerAccent : palette.dim}">${month.label}</text>` : "";
-    return `<g><title>${escape(month.label)}: ${month.commits} commits</title><rect x="${x}" y="${y}" width="${width}" height="${height}" fill="${palette.building}" stroke="${palette.dim}" stroke-width="2"/>${windows.join("")}</g>${label}`;
+    const roof = `<path d="M${x - 5} ${y}h${width + 10}l-5 -7h-42z" fill="${palette.building}" stroke="${palette.dim}" stroke-width="1"/>`;
+    const antenna = index % 3 === 0 ? `<path d="M${x + width / 2} ${y - 7}v-10" stroke="${towerAccent}" stroke-width="2" opacity=".7"/>` : "";
+    return `<g><title>${escape(month.label)}: ${month.commits} commits</title><rect x="${x}" y="${y}" width="${width}" height="${height}" fill="url(#building-gradient)" stroke="${palette.dim}" stroke-width="2"/>${roof}${antenna}${windows.join("")}</g>${label}`;
   }).join("");
   const header = options.view === "full" ? `<text x="500" y="62" text-anchor="middle" font-size="34" font-weight="700" letter-spacing="7" fill="${palette.text}">COMMIT <tspan fill="${accent}">CITY</tspan></text><text x="500" y="88" text-anchor="middle" font-size="11" letter-spacing="3" fill="${palette.dim}">LAST 12 MONTHS · @${escape(city.username).toUpperCase()}</text>` : "";
   const { total, best, active, average, peak } = metrics(city);
   const stats = options.view === "full" ? [["COMMITS", compact(total)], ["BEST MONTH", best.label], ["PEAK", compact(peak)], ["AVG / MONTH", compact(average)], ["ACTIVE MONTHS", compact(active)]].map(([label, value], index) => `<text x="${100 + index * 200}" y="530" text-anchor="middle" font-size="10" fill="${palette.dim}">${label}: <tspan fill="${accent}">${value}</tspan></text>`).join("") : "";
   const stars = day ? "" : Array.from({ length: 30 }, (_, index) => `<circle cx="${30 + (index * 83) % 940}" cy="${18 + (index * 47) % 250}" r="1" fill="${accent}" opacity=".35"><animate attributeName="opacity" values=".12;.7;.12" dur="${2 + index % 3}s" begin="${index / 8}s" repeatCount="indefinite"/></circle>`).join("");
   const crop = options.view === "city" ? { y: 120, h: 400 } : options.view === "months" ? { y: 80, h: 450 } : { y: 0, h: 560 };
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 ${crop.y} 1000 ${crop.h}" width="1000" height="${crop.h}" role="img" aria-label="Commit City for ${escape(city.username)}"><rect y="${crop.y}" width="1000" height="${crop.h}" fill="${palette.bg}"/>${stars}${header}${towers}<path d="M0 ${ground}H1000" stroke="${accent}" stroke-width="3"/>${stats}</svg>`;
+  const grid = Array.from({ length: 10 }, (_, index) => `<path d="M0 ${ground - (index + 1) * 24}H1000" stroke="${palette.dim}" opacity=".08"/>`).join("");
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 ${crop.y} 1000 ${crop.h}" width="1000" height="${crop.h}" role="img" aria-label="Commit City for ${escape(city.username)}"><defs><linearGradient id="building-gradient" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${palette.building}"/><stop offset="1" stop-color="${day ? "#c9c4b8" : "#17191f"}"/></linearGradient></defs><rect y="${crop.y}" width="1000" height="${crop.h}" fill="${palette.bg}"/>${stars}${header}${grid}${towers}<path d="M0 ${ground}H1000" stroke="${accent}" stroke-width="3"/><path d="M0 ${ground + 5}H1000" stroke="${accent}" stroke-width="1" opacity=".3"/>${stats}</svg>`;
 }
 
 export function parseContributionCalendar(html) {
