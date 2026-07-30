@@ -104,7 +104,7 @@ function palette(theme: Theme): Palette {
         outlineOff: "#a9a598",
         windowOff: "#9b9789",
         text: "#1c1c1a",
-        dim: "#6b6counter",
+        dim: "#6b6b63",
         hair: "#0000000f",
       };
 }
