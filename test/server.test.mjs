@@ -19,6 +19,12 @@ test("buildings view hides the header and statistics", () => {
   assert.doesNotMatch(svg, /COMMIT CITY|COMMITS \/ 12M|LAST 12 MONTHS/);
 });
 
+test("colored buildings are the default and can be turned off", () => {
+  const city = { username: "octocat", months: [{ label: "JAN", commits: 4 }] };
+  assert.match(generateCitySvg(city, parseOptions(new URL("http://localhost/?color=purple"))), /fill="#b57bff"/);
+  assert.match(generateCitySvg(city, parseOptions(new URL("http://localhost/?color=purple&buildings=mono"))), /fill="#20232c"/);
+});
+
 test("contribution calendar is grouped by month", () => {
   const html = '<tool-tip aria-label="4 contributions" for="contribution-day-component-0-1"><span>4 contributions on Jan 2</span></tool-tip><td id="contribution-day-component-0-1" data-date="2026-01-02"></td>';
   assert.equal(parseContributionCalendar(html).get("2026-01"), 4);
