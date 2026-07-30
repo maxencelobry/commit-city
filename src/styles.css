@@ -19,7 +19,8 @@
  */
 
 @theme inline {
-  --font-sans: "Outfit", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+  --font-pixel: "Silkscreen", "JetBrains Mono", monospace;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
   --color-neon: var(--neon);
   --color-neon-foreground: var(--neon-foreground);
@@ -69,29 +70,29 @@
 
 :root {
   --radius: 0.75rem;
-  --neon: oklch(0.7 0.19 300);
+  --neon: oklch(0.9 0.2 120);
   --neon-foreground: oklch(0.16 0.03 285);
   --surface: oklch(0.18 0.03 285);
   --surface-2: oklch(0.23 0.035 288);
-  --background: oklch(0.14 0.025 285);
-  --foreground: oklch(0.96 0.01 285);
-  --card: oklch(0.18 0.03 285);
+  --background: oklch(0.16 0.004 250);
+  --foreground: oklch(0.94 0.008 90);
+  --card: oklch(0.2 0.004 250);
   --card-foreground: oklch(0.96 0.01 285);
-  --popover: oklch(0.18 0.03 285);
+  --popover: oklch(0.2 0.004 250);
   --popover-foreground: oklch(0.96 0.01 285);
-  --primary: oklch(0.72 0.2 300);
-  --primary-foreground: oklch(0.16 0.03 285);
-  --secondary: oklch(0.24 0.035 288);
+  --primary: oklch(0.9 0.2 120);
+  --primary-foreground: oklch(0.17 0.01 120);
+  --secondary: oklch(0.24 0.004 250);
   --secondary-foreground: oklch(0.96 0.01 285);
-  --muted: oklch(0.24 0.035 288);
-  --muted-foreground: oklch(0.72 0.03 285);
-  --accent: oklch(0.28 0.05 300);
+  --muted: oklch(0.24 0.004 250);
+  --muted-foreground: oklch(0.7 0.008 250);
+  --accent: oklch(0.28 0.03 120);
   --accent-foreground: oklch(0.96 0.01 285);
   --destructive: oklch(0.577 0.245 27.325);
   --destructive-foreground: oklch(0.984 0.003 247.858);
   --border: oklch(1 0 0 / 12%);
   --input: oklch(1 0 0 / 16%);
-  --ring: oklch(0.72 0.2 300);
+  --ring: oklch(0.9 0.2 120);
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
@@ -108,7 +109,7 @@
 }
 
 .dark {
-  --neon: oklch(0.72 0.2 300);
+  --neon: oklch(0.9 0.2 120);
   --neon-foreground: oklch(0.16 0.03 285);
   --surface: oklch(0.18 0.03 285);
   --surface-2: oklch(0.23 0.035 288);
@@ -160,8 +161,7 @@
 @layer base {
   body {
     background-image:
-      radial-gradient(900px 500px at 15% -10%, oklch(0.72 0.2 300 / 0.22), transparent 60%),
-      radial-gradient(700px 400px at 90% 0%, oklch(0.7 0.16 220 / 0.18), transparent 60%);
+      radial-gradient(800px 420px at 50% -12%, oklch(0.9 0.2 120 / 0.12), transparent 62%);
     background-attachment: fixed;
   }
 }
