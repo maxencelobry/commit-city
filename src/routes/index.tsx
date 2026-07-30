@@ -110,16 +110,19 @@ function Home() {
 
       <section className="mx-auto max-w-5xl px-6 pt-6 pb-4 text-center">
         <span className="inline-flex items-center gap-2 rounded-full border border-border bg-card/60 px-3 py-1 text-xs tracking-wide text-muted-foreground uppercase">
-          <Sparkles className="size-3.5 text-primary" /> Flat vector city generator
+          <Sparkles className="size-3.5 text-primary" /> Pixel skyline generator
         </span>
-        <h1 className="mx-auto mt-5 max-w-3xl text-4xl leading-tight font-bold tracking-tight sm:text-6xl">
-          Your GitHub profile,
+        <h1
+          className="mx-auto mt-6 max-w-3xl text-3xl leading-tight tracking-tight sm:text-5xl"
+          style={{ fontFamily: "var(--font-pixel)" }}
+        >
+          YOUR LAST 12 MONTHS,
           <br />
-          rebuilt as a <span className="text-primary">pixel city</span>
+          <span className="text-primary">AS A CITY</span>
         </h1>
-        <p className="mx-auto mt-5 max-w-xl text-base text-muted-foreground">
-          Every repository becomes a building. Commits set the height, project size sets the width,
-          stars grow landmarks, and each language gets its own district.
+        <p className="mx-auto mt-6 max-w-xl text-sm leading-relaxed text-muted-foreground">
+          One building per month over the last 12 months. The more you commit, the taller the tower
+          and the more windows light up on your pixel skyline.
         </p>
 
         <form
