@@ -1,4 +1,4 @@
-const state = { theme: "night", color: "lime", view: "full", username: "octocat" };
+const state = { theme: "night", color: "lime", view: "full", username: "" };
 const preview = document.querySelector("#preview");
 const share = document.querySelector("#share");
 const shareCode = document.querySelector("#share-url");
@@ -13,6 +13,7 @@ function cityUrl(fresh = false) {
 }
 
 function render() {
+  if (!state.username) { preview.removeAttribute("src"); share.hidden = true; status.textContent = "Enter a username to start"; debugOutput.textContent = "Waiting for a GitHub username."; return; }
   const sharePath = cityUrl();
   const previewPath = cityUrl(true);
   status.textContent = "Loading…";

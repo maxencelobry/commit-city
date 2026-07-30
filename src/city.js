@@ -5,7 +5,7 @@ import { fileURLToPath } from "node:url";
 
 const root = fileURLToPath(new URL("../", import.meta.url));
 const MONTHS = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
-const colors = { lime: "#c6f432", purple: "#b57bff", blue: "#54a8ff", orange: "#ff9542", pink: "#ff6bb5", cyan: "#3fe0da" };
+const colors = { lime: "#c6f432", purple: "#b57bff", blue: "#54a8ff", orange: "#ff9542", pink: "#ff6bb5", cyan: "#3fe0da", mix: "#c6f432" };
 
 export function parseOptions(url) {
   return {
@@ -24,6 +24,7 @@ export function generateCitySvg(city, options) {
     ? { bg: "#f4f0e8", building: "#d8d3c6", text: "#24231f", dim: "#706d65" }
     : { bg: "#101116", building: "#20232c", text: "#f4f0e8", dim: "#969ba8" };
   const accent = colors[options.color];
+  const accents = ["#c6f432", "#54a8ff", "#b57bff", "#ff6bb5", "#3fe0da"];
   const max = Math.max(1, ...city.months.map((month) => month.commits));
   const ground = options.view === "buildings" ? 480 : 405;
   const towers = city.months.map((month, index) => {
@@ -32,17 +33,20 @@ export function generateCitySvg(city, options) {
     const height = 48 + Math.round((month.commits / max) * 220);
     const y = ground - height;
     const hot = month.commits / max >= 0.45;
+    const towerAccent = options.color === "mix" ? accents[index % accents.length] : accent;
     const windows = [];
     for (let row = y + 16; row < ground - 10; row += 18) {
       for (let col = x + 12; col < x + width - 8; col += 16) {
-        if ((row + col + index * 11) % 3 !== 0) windows.push(`<rect x="${col}" y="${row}" width="6" height="6" fill="${hot ? accent : palette.dim}" opacity=".85"/>`);
+        if ((row + col + index * 11) % 3 !== 0) windows.push(`<rect x="${col}" y="${row}" width="6" height="6" fill="${hot ? towerAccent : palette.dim}" opacity=".85"/>`);
       }
     }
-    const label = options.view === "full" ? `<text x="${x + width / 2}" y="${ground + 28}" text-anchor="middle" font-size="10" fill="${hot ? accent : palette.dim}">${month.label}</text>` : "";
-    return `<g><title>${escape(month.label)}: ${month.commits} commits</title><rect x="${x}" y="${y}" width="${width}" height="${height}" fill="${palette.building}" stroke="${hot ? accent : palette.dim}" stroke-width="2"/>${windows.join("")}</g>${label}`;
+    const label = options.view === "full" ? `<text x="${x + width / 2}" y="${ground + 28}" text-anchor="middle" font-size="10" fill="${hot ? towerAccent : palette.dim}">${month.label}</text>` : "";
+    return `<g><title>${escape(month.label)}: ${month.commits} commits</title><rect x="${x}" y="${y}" width="${width}" height="${height}" fill="${palette.building}" stroke="${hot ? towerAccent : palette.dim}" stroke-width="2"/>${windows.join("")}</g>${label}`;
   }).join("");
   const header = options.view === "full" ? `<text x="500" y="62" text-anchor="middle" font-size="34" font-weight="700" letter-spacing="7" fill="${palette.text}">COMMIT <tspan fill="${accent}">CITY</tspan></text><text x="500" y="88" text-anchor="middle" font-size="11" letter-spacing="3" fill="${palette.dim}">LAST 12 MONTHS · @${escape(city.username).toUpperCase()}</text>` : "";
-  const stats = options.view === "full" ? [["COMMITS / 12M", compact(city.months.reduce((total, month) => total + month.commits, 0))], ["REPOS", compact(city.repos)], ["STARS", compact(city.stars)], ["FOLLOWERS", compact(city.followers)]].map(([label, value], index) => `<text x="${160 + index * 230}" y="530" text-anchor="middle" font-size="11" fill="${palette.dim}">${label}: <tspan fill="${accent}">${value}</tspan></text>`).join("") : "";
+  const active = city.months.filter((month) => month.commits > 0).length;
+  const best = city.months.reduce((top, month) => month.commits > top.commits ? month : top, city.months[0]);
+  const stats = options.view === "full" ? [["COMMITS / 12M", compact(city.months.reduce((total, month) => total + month.commits, 0))], ["BEST MONTH", best.label], ["ACTIVE MONTHS", compact(active)]].map(([label, value], index) => `<text x="${250 + index * 250}" y="530" text-anchor="middle" font-size="11" fill="${palette.dim}">${label}: <tspan fill="${accent}">${value}</tspan></text>`).join("") : "";
   const stars = day ? "" : Array.from({ length: 30 }, (_, index) => `<circle cx="${30 + (index * 83) % 940}" cy="${18 + (index * 47) % 250}" r="1" fill="${accent}" opacity=".35"/>`).join("");
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 560" width="1000" height="560" role="img" aria-label="Commit City for ${escape(city.username)}"><rect width="1000" height="560" rx="16" fill="${palette.bg}"/>${stars}${header}${towers}<path d="M0 ${ground}H1000" stroke="${accent}" stroke-width="3"/>${stats}</svg>`;
 }
