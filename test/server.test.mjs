@@ -24,14 +24,14 @@ test("windows mix dark gray and accent colors", () => {
   const svg = generateCitySvg(city, parseOptions(new URL("http://localhost/?color=purple")));
   assert.match(svg, /fill="#b57bff" opacity=".95">/);
   assert.match(svg, /fill="#969ba8" opacity=".72"/);
-  assert.match(svg, /fill="#20232c" stroke="#969ba8"/);
+  assert.match(svg, /stop-color="#20232c"/);
 });
 
 test("activity changes the ratio of colored windows, not buildings", () => {
   const city = { username: "octocat", months: [{ label: "LOW", commits: 1 }, { label: "HIGH", commits: 10 }] };
   const svg = generateCitySvg(city, parseOptions(new URL("http://localhost/?color=purple")));
   assert.doesNotMatch(svg, /fill="#b57bff" opacity=".28"/);
-  assert.match(svg, /fill="#20232c" stroke="#969ba8"/);
+  assert.match(svg, /stop-color="#20232c"/);
 });
 
 test("contribution calendar is grouped by month", () => {
