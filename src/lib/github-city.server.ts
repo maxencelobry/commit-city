@@ -37,8 +37,8 @@ async function monthlyCommits(username: string): Promise<MonthInput[]> {
     const tipRe = /<tool-tip[^>]*for="(contribution-day-[^"]+)"[^>]*>([^<]*)<\/tool-tip>/g;
     let t: RegExpExecArray | null;
     while ((t = tipRe.exec(html))) {
-      const n = t[2].match(/^(\d+)\s+contribution/);
-      tips.set(t[1], n ? Number(n[1]) : 0);
+      const n = t[2].trim().match(/^([\d,]+)\s+contribution/);
+      tips.set(t[1], n ? Number(n[1].replace(/,/g, "")) : 0);
     }
 
     const dayRe = /data-date="(\d{4}-\d{2})-\d{2}"[^>]*id="(contribution-day-[^"]+)"/g;
@@ -62,15 +62,20 @@ export async function buildCity(username: string): Promise<CityInput> {
   ]);
 
   if (userRes.status === 404) throw new Error(`No GitHub user named "${username}"`);
-  if (!userRes.ok) throw new Error(`GitHub API error (${userRes.status}) — try again later`);
 
-  const user = (await userRes.json()) as {
-    login: string;
-    name: string | null;
-    followers: number;
-    following: number;
-    public_repos: number;
+  // The public API is rate limited; profile stats are a bonus, the skyline is not.
+  let user = {
+    login: username,
+    name: null as string | null,
+    followers: 0,
+    following: 0,
+    public_repos: 0,
   };
+  if (userRes.ok) {
+    user = (await userRes.json()) as typeof user;
+  } else if (months.length !== 12) {
+    throw new Error(`GitHub API error (${userRes.status}) — try again later`);
+  }
 
   let totalStars = 0;
   if (reposRes.ok) {
