@@ -1,4 +1,4 @@
-const state = { theme: "night", color: "lime", view: "full", username: "" };
+const state = { theme: "night", color: "lime", view: "full", username: "maxencelobry" };
 const preview = document.querySelector("#preview");
 const share = document.querySelector("#share");
 const shareCode = document.querySelector("#share-url");
