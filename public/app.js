@@ -3,7 +3,6 @@ const preview = document.querySelector("#preview");
 const share = document.querySelector("#share");
 const shareCode = document.querySelector("#share-url");
 const markdown = document.querySelector("#markdown");
-const profileLink = document.querySelector("#profile-link");
 const status = document.querySelector("#status");
 const debugOutput = document.querySelector("#debug-output");
 
@@ -22,7 +21,6 @@ function render() {
   preview.src = previewPath;
   shareCode.textContent = new URL(sharePath, window.location.origin).href;
   document.querySelector("#download").href = sharePath;
-  profileLink.href = "/u/" + encodeURIComponent(state.username);
   markdown.textContent = "[![Commit City for @" + state.username + "](" + shareCode.textContent + ")](" + window.location.origin + ")";
   share.hidden = false;
   debugOutput.textContent = "Requesting @" + state.username + " · theme=" + state.theme + " · color=" + state.color + " · view=" + state.view;
@@ -70,9 +68,3 @@ document.querySelector("#copy-markdown").addEventListener("click", async () => {
 });
 
 render();
-
-document.querySelector("#example").addEventListener("click", () => {
-  document.querySelector("#username").value = "maxencelobry";
-  state.username = "maxencelobry";
-  render();
-});
