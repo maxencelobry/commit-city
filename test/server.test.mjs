@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { generateCitySvg, parseContributionCalendar, parseOptions } from "../src/city.js";
+import { calculateBadges, generateBadgeSvg, generateCitySvg, parseContributionCalendar, parseOptions } from "../src/city.js";
 
 test("buildings view hides the header and statistics", () => {
   const svg = generateCitySvg(
@@ -20,7 +20,7 @@ test("buildings view hides the header and statistics", () => {
 });
 
 test("contribution calendar is grouped by month", () => {
-  const html = '<tool-tip for="contribution-day-component-0-1">4 contributions on Jan 2</tool-tip><td data-date="2026-01-02" id="contribution-day-component-0-1"></td>';
+  const html = '<tool-tip aria-label="4 contributions" for="contribution-day-component-0-1"><span>4 contributions on Jan 2</span></tool-tip><td id="contribution-day-component-0-1" data-date="2026-01-02"></td>';
   assert.equal(parseContributionCalendar(html).get("2026-01"), 4);
 });
 
@@ -30,7 +30,13 @@ test("full city exposes the total contributions in the SVG", () => {
     parseOptions(new URL("http://localhost/?view=full")),
   );
 
-  assert.match(svg, /COMMITS \/ 12M:.*>103</);
+  assert.match(svg, /COMMITS:.*>103</);
+});
+
+test("badges and README badge are derived from contribution metrics", () => {
+  const city = { username: "builder", months: Array.from({ length: 12 }, (_, index) => ({ label: `M${index}`, commits: index === 11 ? 40 : 10 })) };
+  assert.deepEqual(calculateBadges(city).map((badge) => badge.id), ["night-owl", "mayor", "streak"]);
+  assert.match(generateBadgeSvg(city), /Open Source Mayor/);
 });
 
 
