@@ -32,3 +32,4 @@ test("full city exposes the total contributions in the SVG", () => {
 
   assert.match(svg, /COMMITS \/ 12M:.*>103</);
 });
+
