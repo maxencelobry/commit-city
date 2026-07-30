@@ -16,7 +16,7 @@ export function parseOptions(url) {
 }
 
 const escape = (value) => String(value).replace(/[&<>"']/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[char]);
-const compact = (number) => number >= 1000 ? `${(number / 1000).toFixed(1).replace(".0", "")}k` : String(number);
+const compact = (number) => number == null ? "—" : number >= 1000 ? `${(number / 1000).toFixed(1).replace(".0", "")}k` : String(number);
 
 export function generateCitySvg(city, options) {
   const day = options.theme === "day";
@@ -71,15 +71,15 @@ async function getCity(username) {
   if (profileResponse.status === 404) throw new Error("GitHub user not found");
   const profile = profileResponse.ok
     ? await profileResponse.json()
-    : { login: username, followers: 0, public_repos: 0 };
+    : { login: username, followers: null, public_repos: null };
   const repos = reposResponse.ok ? await reposResponse.json() : [];
   const contributions = contributionsResponse.ok ? parseContributionCalendar(await contributionsResponse.text()) : new Map();
   const now = new Date();
   return {
     username: profile.login,
-    followers: profile.followers || 0,
-    repos: profile.public_repos || 0,
-    stars: repos.filter((repo) => !repo.fork).reduce((total, repo) => total + (repo.stargazers_count || 0), 0),
+    followers: profile.followers ?? null,
+    repos: profile.public_repos ?? null,
+    stars: reposResponse.ok ? repos.filter((repo) => !repo.fork).reduce((total, repo) => total + (repo.stargazers_count || 0), 0) : null,
     months: Array.from({ length: 12 }, (_, index) => {
       const date = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - 11 + index, 1));
       const key = `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, "0")}`;
