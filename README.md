@@ -3,7 +3,7 @@
 Turn a GitHub contribution history into a living pixel-art city.
 
 <p align="center">
-  <img src="public/maxencelobry.svg" alt="Commit City for @maxencelobry" width="900">
+  <img src="https://hustlers.studio/commit-city/api/city/maxencelobry.svg?theme=night&amp;color=mix&amp;view=full" alt="Commit City for @maxencelobry" width="900">
 </p>
 
 <p align="center">
@@ -40,7 +40,7 @@ GITHUB_TOKEN=github_pat_your_token_here
 ## Share
 
 ```md
-[![Commit City for @maxencelobry](https://hustlers.studio/commit-city/api/badge/maxencelobry.svg)](https://hustlers.studio/commit-city/u/maxencelobry)
+[![Commit City for @maxencelobry](https://hustlers.studio/commit-city/api/city/maxencelobry.svg?theme=night&color=mix&view=full)](https://hustlers.studio/commit-city/u/maxencelobry)
 ```
 
 SVG options: `theme=night|day`, `color=lime|purple|blue|orange|pink|cyan|mix`, `view=full|months|city`.
