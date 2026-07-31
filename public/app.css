@@ -91,6 +91,7 @@ form,#share{flex-direction:column}
 }
 
 :root{--site-accent:#c6f432}
+ #share p{color:var(--site-accent)!important}
 header span,h1 span,article b,footer a,.quick-links button,.share-links a{color:var(--site-accent)!important}
 .eyebrow{border-color:color-mix(in srgb,var(--site-accent) 34%,transparent)!important;color:var(--site-accent)!important}
 form button,.selected{background:var(--site-accent)!important;border-color:var(--site-accent)!important}
