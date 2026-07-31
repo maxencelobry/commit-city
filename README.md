@@ -47,10 +47,14 @@ SVG options: `theme=night|day`, `color=lime|purple|blue|orange|pink|cyan|mix`, `
 
 ## Production
 
-Production URL: `https://hustlers.studio/commit-city/`.
+Live site: [hustlers.studio/commit-city](https://hustlers.studio/commit-city/).
 
-The app builds share links from current request origin, so no production domain is hardcoded in application code. Deployment templates live in `deploy/`.
+- Cloudflare terminates public HTTPS; Nginx serves the HTTP origin.
+- App runs from `/home/ubuntu/projects/commit-city` as `commit-city.service`.
+- Nginx loads reusable project routes from `/etc/nginx/snippets/hustlers-projects/`, so future apps can add their own path block.
+- Deployment templates are in `deploy/`. After updating files on the VPS, run `sudo systemctl restart commit-city` and `sudo nginx -t && sudo systemctl reload nginx` when Nginx changes.
 
+The app builds share links from current request origin, so no production domain is hardcoded in application code.
 ## Inspiration
 
 Inspired by [GitHub City](https://githubcity.blog/). Commit City explores the same playful idea through a lightweight 2D pixel skyline, animated SVGs and README-first sharing.
