@@ -6,6 +6,17 @@ const markdown = document.querySelector("#markdown");
 const status = document.querySelector("#status");
 const debugOutput = document.querySelector("#debug-output");
 
+const siteThemes = [
+  { name: "lime", color: "#c6f432" },
+  { name: "blue", color: "#54a8ff" },
+  { name: "purple", color: "#b57bff" },
+  { name: "orange", color: "#ff9542" },
+  { name: "cyan", color: "#3fe0da" },
+];
+const siteTheme = siteThemes[Math.floor(Math.random() * siteThemes.length)];
+document.documentElement.dataset.siteTheme = siteTheme.name;
+document.documentElement.style.setProperty("--site-accent", siteTheme.color);
+
 function cityUrl(fresh = false) {
   const query = new URLSearchParams({ theme: state.theme, color: state.color, view: state.view });
   if (fresh) query.set("refresh", Date.now());
