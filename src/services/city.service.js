@@ -187,7 +187,7 @@ export async function handler(request, response) {
   if (!safe.startsWith(root)) return send(response, 403, "text/plain", "Forbidden");
   try {
     const body = await readFile(safe);
-    const types = { ".html": "text/html; charset=utf-8", ".css": "text/css; charset=utf-8", ".js": "text/javascript; charset=utf-8", ".ico": "image/x-icon" };
+    const types = { ".html": "text/html; charset=utf-8", ".css": "text/css; charset=utf-8", ".js": "text/javascript; charset=utf-8", ".svg": "image/svg+xml; charset=utf-8", ".ico": "image/x-icon" };
     send(response, 200, types[extname(safe)] || "application/octet-stream", body);
   } catch { send(response, 404, "text/plain", "Not found"); }
 }

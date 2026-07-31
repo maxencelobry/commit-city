@@ -4,6 +4,8 @@ Turn a GitHub contribution calendar into a living pixel-art skyline.
 
 Commit City is a lightweight, share-first project: one public profile becomes a city, an embeddable SVG and a compact README badge. No account, database or build pipeline is required.
 
+![Example Commit City for @maxencelobry](public/maxencelobry.svg)
+
 ## What you get
 
 - Three export layouts: complete, city + months, and city only.
@@ -37,19 +39,19 @@ GITHUB_TOKEN=github_pat_your_token_here
 Profile page:
 
 ```text
-http://localhost:3000/u/octocat
+http://localhost:3000/u/maxencelobry
 ```
 
 Full SVG:
 
 ```text
-http://localhost:3000/api/city/octocat.svg?theme=night&color=lime&view=full
+http://localhost:3000/api/city/maxencelobry.svg?theme=night&color=lime&view=full
 ```
 
 Compact README badge:
 
 ```md
-[![Commit City for @octocat](https://your-domain.example/api/badge/octocat.svg)](https://your-domain.example/u/octocat)
+[![Commit City for @maxencelobry](https://your-domain.example/api/badge/maxencelobry.svg)](https://your-domain.example/u/maxencelobry)
 ```
 
 The SVG endpoint accepts `theme=night|day`, `color=lime|purple|blue|orange|pink|cyan|mix`, and `view=full|months|city`.

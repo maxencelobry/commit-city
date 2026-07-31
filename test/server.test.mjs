@@ -6,7 +6,7 @@ import { calculateBadges, generateBadgeSvg, generateCitySvg, parseContributionCa
 test("buildings view hides the header and statistics", () => {
   const svg = generateCitySvg(
     {
-      username: "octocat",
+      username: "maxencelobry",
       followers: 1,
       repos: 2,
       stars: 3,
@@ -20,7 +20,7 @@ test("buildings view hides the header and statistics", () => {
 });
 
 test("windows mix dark gray and accent colors", () => {
-  const city = { username: "octocat", months: [{ label: "JAN", commits: 1 }, { label: "FEB", commits: 4 }] };
+  const city = { username: "maxencelobry", months: [{ label: "JAN", commits: 1 }, { label: "FEB", commits: 4 }] };
   const svg = generateCitySvg(city, parseOptions(new URL("http://localhost/?color=purple")));
   assert.match(svg, /fill="#b57bff" opacity=".95">/);
   assert.match(svg, /fill="#969ba8" opacity=".72"/);
