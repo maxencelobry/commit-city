@@ -6,6 +6,14 @@ Commit City is a lightweight, share-first project: one public profile becomes a 
 
 ![Example Commit City for @maxencelobry](public/maxencelobry.svg)
 
+## Inspiration
+
+This project was greatly inspired by [GitHub City](https://githubcity.blog/), a tool that turns GitHub contribution activity into a city and makes developer activity easier to explore visually. Commit City takes that idea in its own direction: a lightweight 2D pixel skyline, animated SVG exports, public profile pages and README-first sharing.
+
+## Part of a project series
+
+Commit City is one project in my growing collection of small, focused experiments. This suite is built to show recruiters how I design, ship and polish complete products: clear interfaces, useful APIs, thoughtful details, responsive behavior and maintainable code. Each project explores a different idea while keeping the scope intentionally understandable.
+
 ## What you get
 
 - Three export layouts: complete, city + months, and city only.
