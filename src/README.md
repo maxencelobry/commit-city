@@ -1,4 +1,6 @@
 # Source code
 
-- `app.js`: Express routes and static files
-- `city.js`: GitHub data and SVG generation
+- `app.js`: Express application bootstrap
+- `routes/city.route.js`: HTTP route adapter
+- `services/city.service.js`: GitHub fetching, contribution parsing and SVG generation
+- `city.js`: compatibility exports for existing integrations
