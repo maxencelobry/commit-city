@@ -155,11 +155,11 @@ export function generateBadgeSvg(city) {
   return `<svg xmlns="http://www.w3.org/2000/svg" width="620" height="96" role="img" aria-label="Commit City badge for ${escape(city.username)}"><rect width="620" height="96" rx="10" fill="#101116"/><rect x="1" y="1" width="618" height="94" rx="9" fill="none" stroke="#c6f432"/><text x="24" y="35" fill="#f4f0e8" font-family="monospace" font-size="18" font-weight="700">COMMIT <tspan fill="#c6f432">CITY</tspan></text><text x="24" y="63" fill="#969ba8" font-family="monospace" font-size="12">@${escape(city.username)} · ${compact(total)} commits · ${active}/12 active</text><text x="596" y="56" text-anchor="end" fill="#c6f432" font-family="monospace" font-size="12">${escape(badges)}</text><title>Commit City for @${escape(city.username)} — ${peak} peak commits</title></svg>`;
 }
 
-function profilePage(city, origin) {
+export function profilePage(city, origin, basePath = "") {
   const badges = calculateBadges(city);
   const badgeCards = badges.length ? badges.map((badge) => `<li><strong>${escape(badge.label)}</strong><span>${escape(badge.detail)}</span></li>`).join("") : "<li><strong>Building in public</strong><span>Keep shipping to unlock badges.</span></li>";
   const username = escape(city.username);
-  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>@${username} · Commit City</title><meta name="description" content="A living Commit City for @${username}."><meta property="og:title" content="@${username} · Commit City"><meta property="og:image" content="${origin}/api/city/${encodeURIComponent(city.username)}.svg"><link rel="stylesheet" href="/app.css"></head><body><main class="profile"><a class="back" href="/">← Build your city</a><section class="profile-head"><p class="eyebrow">GITHUB CITIZEN</p><h1>@${username}</h1><p>Your code, rendered as a city.</p></section><div class="profile-card"><img src="/api/city/${encodeURIComponent(city.username)}.svg?view=full" alt="Commit City for @${username}"></div><section class="badges"><p class="eyebrow">BADGES</p><ul>${badgeCards}</ul></section><p class="profile-links"><a href="/api/badge/${encodeURIComponent(city.username)}.svg">README badge</a> · <a href="https://github.com/${encodeURIComponent(city.username)}">GitHub profile</a></p></main></body></html>`;
+  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>@${username} · Commit City</title><meta name="description" content="A living Commit City for @${username}."><meta property="og:title" content="@${username} · Commit City"><meta property="og:image" content="${origin}${basePath}/api/city/${encodeURIComponent(city.username)}.svg"><link rel="stylesheet" href="${basePath}/app.css"></head><body><main class="profile"><a class="back" href="${basePath}/">← Build your city</a><section class="profile-head"><p class="eyebrow">GITHUB CITIZEN</p><h1>@${username}</h1><p>Your code, rendered as a city.</p></section><div class="profile-card"><img src="${basePath}/api/city/${encodeURIComponent(city.username)}.svg?view=full" alt="Commit City for @${username}"></div><section class="badges"><p class="eyebrow">BADGES</p><ul>${badgeCards}</ul></section><p class="profile-links"><a href="${basePath}/api/badge/${encodeURIComponent(city.username)}.svg">README badge</a> · <a href="https://github.com/${encodeURIComponent(city.username)}">GitHub profile</a></p></main></body></html>`;
 }
 
 export async function handler(request, response) {
@@ -169,7 +169,7 @@ export async function handler(request, response) {
   if (profileMatch || badgeMatch) {
     try {
       const city = await getCity(profileMatch?.[1] || badgeMatch[1]);
-      send(response, 200, profileMatch ? "text/html; charset=utf-8" : "image/svg+xml; charset=utf-8", profileMatch ? profilePage(city, `${url.protocol}//${url.host}`) : generateBadgeSvg(city));
+      send(response, 200, profileMatch ? "text/html; charset=utf-8" : "image/svg+xml; charset=utf-8", profileMatch ? profilePage(city, `${url.protocol}//${url.host}`, request.headers["x-forwarded-prefix"] || "") : generateBadgeSvg(city));
     } catch (error) {
       send(response, 404, "text/plain; charset=utf-8", error.message);
     }

@@ -1,7 +1,14 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { calculateBadges, generateBadgeSvg, generateCitySvg, parseContributionCalendar, parseContributionStreak, parseOptions } from "../src/city.js";
+import { calculateBadges, generateBadgeSvg, generateCitySvg, parseContributionCalendar, parseContributionStreak, parseOptions, profilePage } from "../src/city.js";
+
+test("profile page keeps reverse-proxy path in asset and API links", () => {
+  const html = profilePage({ username: "octocat", months: [] }, "https://hustlers.studio", "/commit-city");
+  assert.match(html, /href="\/commit-city\/app.css"/);
+  assert.match(html, /src="\/commit-city\/api\/city\/octocat\.svg\?view=full"/);
+  assert.match(html, /href="\/commit-city\/api\/badge\/octocat\.svg"/);
+});
 
 test("buildings view hides the header and statistics", () => {
   const svg = generateCitySvg(

@@ -17,10 +17,13 @@ const siteTheme = siteThemes[Math.floor(Math.random() * siteThemes.length)];
 document.documentElement.dataset.siteTheme = siteTheme.name;
 document.documentElement.style.setProperty("--site-accent", siteTheme.color);
 
+const appBase = new URL(".", window.location.href);
+
 function cityUrl(fresh = false) {
   const query = new URLSearchParams({ theme: state.theme, color: state.color, view: state.view });
   if (fresh) query.set("refresh", Date.now());
-  return "/api/city/" + encodeURIComponent(state.username) + ".svg?" + query;
+  const url = new URL("api/city/" + encodeURIComponent(state.username) + ".svg?" + query, appBase);
+  return url.pathname + url.search;
 }
 
 function render() {
@@ -32,7 +35,7 @@ function render() {
   preview.src = previewPath;
   shareCode.textContent = new URL(sharePath, window.location.origin).href;
   document.querySelector("#download").href = sharePath;
-  markdown.textContent = "[![Commit City for @" + state.username + "](" + shareCode.textContent + ")](" + window.location.origin + ")";
+  markdown.textContent = "[![Commit City for @" + state.username + "](" + shareCode.textContent + ")](" + appBase.href + ")";
   share.hidden = false;
   debugOutput.textContent = "Requesting @" + state.username + " · theme=" + state.theme + " · color=" + state.color + " · view=" + state.view;
 }

@@ -40,10 +40,16 @@ GITHUB_TOKEN=github_pat_your_token_here
 ## Share
 
 ```md
-[![Commit City for @maxencelobry](https://your-domain.example/api/badge/maxencelobry.svg)](https://your-domain.example/u/maxencelobry)
+[![Commit City for @maxencelobry](https://hustlers.studio/commit-city/api/badge/maxencelobry.svg)](https://hustlers.studio/commit-city/u/maxencelobry)
 ```
 
 SVG options: `theme=night|day`, `color=lime|purple|blue|orange|pink|cyan|mix`, `view=full|months|city`.
+
+## Production
+
+Production URL: `https://hustlers.studio/commit-city/`.
+
+The app builds share links from current request origin, so no production domain is hardcoded in application code. Deployment templates live in `deploy/`.
 
 ## Inspiration
 
