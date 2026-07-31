@@ -27,6 +27,7 @@ code{flex:1;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;color:#aeb
 .debug{margin:14px 0;color:#aeb0bd;font-size:12px}
 .features{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:60px 0}
 article{padding:22px;border:1px solid #ffffff20;border-top:4px solid #c6f432;background:#15151a}
+article{content-visibility:auto;contain-intrinsic-size:130px}
 footer{text-align:center;padding:0 0 40px;color:#888a95;font-size:12px}
 @media(max-width:650px){main{padding:0 16px}
 form,#share{flex-direction:column}
@@ -58,6 +59,35 @@ form,#share{flex-direction:column}
 }
 @keyframes preview-glow{0%,100%{filter:brightness(1)}
 50%{filter:brightness(1.04)}
+}
+
+@media(max-width:480px){
+  body{background-size:24px 24px}
+  main{padding:0 12px;border:0}
+  header{padding:18px 0;font-size:12px;gap:12px}
+  header a:last-child{font-size:0}
+  header a:last-child::after{content:"GitHub ↗";font-size:12px}
+  .intro{margin:52px auto 28px}
+  h1{font-size:clamp(44px,16vw,72px);letter-spacing:1px}
+  .intro>p{font-size:13px}
+  form{gap:7px}
+  form input,form button{width:100%;min-height:48px}
+  .controls{align-items:stretch;gap:8px}
+  fieldset{width:100%;display:flex;flex-wrap:wrap;gap:4px}
+  fieldset legend{width:100%;margin-bottom:2px}
+  fieldset button{flex:1;min-height:38px;padding:7px 5px;font-size:11px}
+  .city{padding:6px;box-shadow:5px 5px #24262c}
+  .city-bar{font-size:9px;padding:8px}
+  #preview{min-height:180px}
+  #share{gap:7px}
+  #share code{width:100%;font-size:10px;padding:11px}
+  #share button,#share a{width:100%;text-align:center;min-height:42px}
+  .features{margin:40px 0;gap:8px}
+  article{padding:16px}
+}
+
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important}
 }
 
 :root{--site-accent:#c6f432}
