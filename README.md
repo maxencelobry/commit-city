@@ -3,7 +3,7 @@
 Turn a GitHub contribution history into a living pixel-art city.
 
 <p align="center">
-  <img src="https://hustlers.studio/commit-city/api/city/maxencelobry.svg?theme=night&amp;color=mix&amp;view=full" alt="Commit City for @maxencelobry" width="900">
+  <img src="https://maxencelobry.tech/commit-city/api/city/maxencelobry.svg?theme=night&amp;color=mix&amp;view=full" alt="Commit City for @maxencelobry" width="900">
 </p>
 
 <p align="center">
@@ -40,19 +40,20 @@ GITHUB_TOKEN=github_pat_your_token_here
 ## Share
 
 ```md
-[![Commit City for @maxencelobry](https://hustlers.studio/commit-city/api/city/maxencelobry.svg?theme=night&color=mix&view=full)](https://hustlers.studio/commit-city/u/maxencelobry)
+[![Commit City for @maxencelobry](https://maxencelobry.tech/commit-city/api/city/maxencelobry.svg?theme=night&color=mix&view=full)](https://maxencelobry.tech/commit-city/u/maxencelobry)
 ```
 
 SVG options: `theme=night|day`, `color=lime|purple|blue|orange|pink|cyan|mix`, `view=full|months|city`.
 
 ## Production
 
-Live site: [hustlers.studio/commit-city](https://hustlers.studio/commit-city/).
+Live site: [maxencelobry.tech/commit-city](https://maxencelobry.tech/commit-city/).
 
-- Cloudflare terminates public HTTPS; Nginx serves the HTTP origin.
-- App runs from `/home/ubuntu/projects/commit-city` as `commit-city.service`.
-- Nginx loads reusable project routes from `/etc/nginx/snippets/hustlers-projects/`, so future apps can add their own path block.
-- After updating files on the VPS, run `sudo systemctl restart commit-city`; for Nginx changes, run `sudo nginx -t && sudo systemctl reload nginx`.
+- Cloudflare serves public HTTPS; Nginx proxies the origin.
+- App runs from `/home/ubuntu/projects/commit-city` with PM2 on port `3001`.
+- Nginx exposes it at `/commit-city/` on `maxencelobry.tech` and sends the `X-Forwarded-Prefix` header.
+- The root of `maxencelobry.tech` is reserved for a future app on port `3000`; `hustlers.studio` is reserved for a future app on port `8585`.
+- After updating files on the VPS, run `pm2 reload ecosystem.config.cjs`; for Nginx changes, run `sudo nginx -t && sudo systemctl reload nginx`.
 
 The app builds share links from current request origin, so no production domain is hardcoded in application code.
 ## Inspiration
