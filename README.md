@@ -2,9 +2,12 @@
 
 Turn a GitHub contribution history into a living pixel-art city.
 
-<p align="center">
-  <img src="https://maxencelobry.tech/commit-city/api/city/maxencelobry.svg?theme=night&amp;color=mix&amp;view=full" alt="Commit City for @maxencelobry" width="900">
-</p>
+> [!IMPORTANT]
+> **This project is no longer hosted.** The instance that used to run at
+> `maxencelobry.tech/commit-city` has been taken down, so every
+> `maxencelobry.tech/commit-city/...` link and image below is dead — including
+> the badges and share URLs. The source here is complete and still runs
+> locally: see [Quick start](#quick-start).
 
 <p align="center">
   <a href="https://github.com/maxencelobry/commit-city"><strong>View source</strong></a>
@@ -43,19 +46,24 @@ GITHUB_TOKEN=github_pat_your_token_here
 [![Commit City for @maxencelobry](https://maxencelobry.tech/commit-city/api/city/maxencelobry.svg?theme=night&color=mix&view=full)](https://maxencelobry.tech/commit-city/u/maxencelobry)
 ```
 
+Those URLs 404 since the instance was taken down — they are kept to document
+the shape of the API. Point them at your own instance to use them.
+
 SVG options: `theme=night|day`, `color=lime|purple|blue|orange|pink|cyan|mix`, `view=full|months|city`.
 
-## Production
+## Hosting (retired)
 
-Live site: [maxencelobry.tech/commit-city](https://maxencelobry.tech/commit-city/).
+Commit City used to run at `maxencelobry.tech/commit-city`, behind Cloudflare
+and Nginx, under PM2 on port 3001. That deployment is gone: the process, the
+Nginx route and the project directory have all been removed from the server.
+Nothing points at this app any more.
 
-- Cloudflare serves public HTTPS; Nginx proxies the origin.
-- App runs from `/home/ubuntu/projects/commit-city` with PM2 on port `3001`.
-- Nginx exposes it at `/commit-city/` on `maxencelobry.tech` and sends the `X-Forwarded-Prefix` header.
-- The root of `maxencelobry.tech` is reserved for a future app on port `3000`; `hustlers.studio` is reserved for a future app on port `8585`.
-- After updating files on the VPS, run `pm2 reload ecosystem.config.cjs`; for Nginx changes, run `sudo nginx -t && sudo systemctl reload nginx`.
+Running it yourself needs nothing more than `npm install && npm run dev` — the
+app builds share links from the current request origin, so no production domain
+is hardcoded in application code. The `deploy/` directory keeps the old systemd
+unit and Nginx snippets for reference only; they describe a setup that no
+longer exists.
 
-The app builds share links from current request origin, so no production domain is hardcoded in application code.
 ## Inspiration
 
 Inspired by [GitHub City](https://githubcity.blog/). Commit City explores the same playful idea through a lightweight 2D pixel skyline, animated SVGs and README-first sharing.
